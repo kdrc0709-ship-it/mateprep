@@ -241,8 +241,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
     setAttachedImage(null);
     setIsLoading(true);
 
-  try {
-      // Llamada directa a Gemini desde el navegador
+ try {
       const ai = new GoogleGenAI({ 
         apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
       });
@@ -254,7 +253,6 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
       const fullReply = response.text || '¡Hola! ¿En qué te puedo ayudar hoy?';
 
-      // Typewriter progressive reveal (rápido y suave)
       let currentIdx = 0;
       const chunkSize = fullReply.length > 300 ? 12 : 6;
       typewriterIntervalRef.current = window.setInterval(() => {
@@ -278,31 +276,11 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        // Paused by user
         return;
       }
       console.error("Error al conectar con Gemini:", err);
       setIsLoading(false);
     }
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMessageId ? { ...m, text: currentSlice } : m
-          )
-        );
-
-        if (currentIdx >= fullReply.length) {
-          if (typewriterIntervalRef.current) {
-            clearInterval(typewriterIntervalRef.current);
-            typewriterIntervalRef.current = null;
-          }
-          setIsLoading(false);
-        }
-      }, 20);
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        // Paused by user
-        return;
-      }
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId
