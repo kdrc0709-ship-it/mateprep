@@ -274,20 +274,50 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
         }
       }, 20);
 
+   try {
+      const ai = new GoogleGenAI({ 
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
+      });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: text,
+      });
+
+      const fullReply = response.text || '¡Hola! ¿En qué te puedo ayudar hoy?';
+
+      let currentIdx = 0;
+      const chunkSize = fullReply.length > 300 ? 12 : 6;
+      typewriterIntervalRef.current = window.setInterval(() => {
+        currentIdx += chunkSize;
+        const currentSlice = fullReply.slice(0, currentIdx);
+
+        setMessages((prev) => 
+          prev.map((m) => 
+            m.id === assistantMessageId ? { ...m, text: currentSlice } : m
+          )
+        );
+
+        if (currentIdx >= fullReply.length) {
+          if (typewriterIntervalRef.current) {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+          }
+          setIsLoading(false);
+        }
+      }, 20);
+
     } catch (err: any) {
       if (err.name === 'AbortError') {
         return;
       }
       console.error("Error al conectar con Gemini:", err);
-      setIsLoading(false);
-    }
+      
+      // El mensaje de error visual debe ir DENTRO del catch:
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId
-            ? {
-                ...m,
-                text: 'Lo siento, hubo un problema temporal al procesar tu solicitud. Por favor intenta enviarla de nuevo.',
-              }
+            ? { ...m, text: 'Lo siento, hubo un problema temporal al procesar tu solicitud.' }
             : m
         )
       );
@@ -295,8 +325,6 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
     } finally {
       abortControllerRef.current = null;
     }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
