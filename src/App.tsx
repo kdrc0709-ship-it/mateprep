@@ -67,7 +67,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white transition-colors flex flex-col font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       {/* Header */}
       <Header
         activeTab={activeTab}
@@ -81,7 +81,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-3 flex flex-col">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 flex flex-col">
         {activeTab === 'chat' && (
           <ChatTutorView
             key={presetTutorText}
@@ -106,20 +106,20 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto py-3 border-t border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/60 transition-colors">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+      <footer className="mt-auto py-4 border-t border-neutral-200 dark:border-neutral-900 bg-neutral-50 dark:bg-black transition-colors">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-600 dark:text-neutral-400">
           <div>
-            <span className="font-bold text-slate-700 dark:text-slate-300">
+            <span className="font-bold text-black dark:text-white">
               MatePrep
             </span>{' '}
             — Tutor IA paso a paso • Sin respuestas secas • Exámenes simulados
           </div>
           <div className="flex items-center gap-4">
-            <span>Sin cuenta • Modo Oscuro / Blanco</span>
+            <span>Sin cuenta • Blanco y Negro</span>
             <button
               type="button"
               onClick={() => setIsScratchpadOpen(true)}
-              className="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+              className="text-black dark:text-white underline hover:opacity-70 cursor-pointer font-medium"
             >
               Pizarra
             </button>

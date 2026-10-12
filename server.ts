@@ -24,9 +24,16 @@ const ai = new GoogleGenAI({
   },
 });
 
-const MATH_MODELS = ['gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.1-flash-lite'];
+const MATH_MODELS = [
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-latest',
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+];
 
-// Helper to generate content with automatic model fallback in case of high demand (503)
+// Helper to generate content with automatic model fallback in case of high demand (503) or quota (429)
 async function generateContentWithFallback(params: { contents: any[]; config?: any }) {
   let lastError: any = null;
   for (const model of MATH_MODELS) {
@@ -38,9 +45,12 @@ async function generateContentWithFallback(params: { contents: any[]; config?: a
       });
       return response;
     } catch (err: any) {
-      console.warn(`Model ${model} failed, trying next model in cascade... Error:`, err.message || err);
       lastError = err;
     }
+  }
+  const isQuota = lastError?.message?.includes('429') || lastError?.message?.includes('Quota') || lastError?.message?.includes('RESOURCE_EXHAUSTED');
+  if (isQuota) {
+    throw new Error('Límite de solicitudes alcanzado temporalmente. Por favor reintenta en unos instantes.');
   }
   throw lastError || new Error('No se pudo conectar con los modelos de IA.');
 }
@@ -57,9 +67,12 @@ async function generateStreamWithFallback(params: { contents: any[]; config?: an
       });
       return { stream, model };
     } catch (err: any) {
-      console.warn(`Stream with model ${model} failed, trying next model in cascade... Error:`, err.message || err);
       lastError = err;
     }
+  }
+  const isQuota = lastError?.message?.includes('429') || lastError?.message?.includes('Quota') || lastError?.message?.includes('RESOURCE_EXHAUSTED');
+  if (isQuota) {
+    throw new Error('Límite de solicitudes alcanzado temporalmente. Por favor reintenta en unos instantes.');
   }
   throw lastError || new Error('No se pudo iniciar el flujo con los modelos de IA.');
 }
@@ -140,7 +153,7 @@ PERSONALIDAD Y TONO:
 - ENTIENDE PERFECTAMENTE ABREVIATURAS Y MODISMOS de chat (ej. "q" o "k" por que, "pq" o "pk" por por qué, "xfa" o "pls" por por favor, "kiero" por quiero, "dnd" por dónde, "cto" por cuánto, "tmb" o "tb" por también, "grax" por gracias, "profe", "ola", "wey", etc.). Interpreta su significado natural sin corregir al alumno ni molestarte.
 
 ÁREAS DE CONOCIMIENTO (RESPONDE CUALQUIER PREGUNTA):
-- Responde TODO tipo de preguntas: Matemáticas, Física, Química, Biología, Historia, Filosofía, Literatura, Computación, Programación, Cultura general, Consejos de estudio para exámenes (UNAM, IPN, CENEVAL EXANI-II) o cualquier duda diaria.
+- Responde TODO tipo de preguntas: Matemáticas, Física, Química, Biología, Historia, Filosofía, Literatura, Computación, Programación, Cultura general, Consejos de estudio para exámenes de preparatoria o cualquier duda diaria.
 
 METODOLOGÍA PEDAGÓGICA PARA EJERCICIOS MATEMÁTICOS O ACADÉMICOS:
 1. Si el usuario plantea un problema o sube una imagen de un ejercicio:
@@ -415,7 +428,7 @@ Requisitos pedagógicos estrictos:
 - Cada pregunta debe tener 4 opciones de respuesta (A, B, C, D) con fórmulas en LaTeX ($...$).
 - Incluir un "hint" (pista) pedagógica que oriente sin regalar la respuesta.
 - Incluir una explicación detallada paso a paso ("stepByStepExplanation") que justifique POR QUÉ la opción correcta es la que es y por qué los distractores son errores comunes.
-- El examen debe ser estimulante, educativo y realista para exámenes como CENEVAL EXANI-II, UNAM, IPN o exámenes parciales de preparatoria.
+- El examen debe ser estimulante, educativo y realista para exámenes parciales y de evaluación de preparatoria.
 
 Devuelve JSON con la estructura:
 {

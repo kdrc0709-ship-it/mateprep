@@ -89,7 +89,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       />
 
       {currentImageBase64 ? (
-        <div className="relative rounded-2xl overflow-hidden border-2 border-indigo-500/40 dark:border-indigo-400/40 bg-slate-900/5 dark:bg-slate-900/40 p-3 flex flex-col items-center">
+        <div className="relative rounded-2xl overflow-hidden border-2 border-neutral-400 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-900 p-3 flex flex-col items-center">
           <div className="relative max-h-72 w-full flex items-center justify-center bg-black/5 dark:bg-black/30 rounded-xl overflow-hidden">
             <img
               src={currentImageBase64}
@@ -99,14 +99,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             <button
               type="button"
               onClick={onClear}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-rose-600/90 hover:bg-rose-700 text-white shadow-md transition-transform hover:scale-105 cursor-pointer"
+              className="absolute top-2 right-2 p-1.5 rounded-full bg-black text-white hover:opacity-80 shadow-md transition-transform hover:scale-105 cursor-pointer"
               title="Quitar imagen"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="mt-2.5 flex items-center gap-2 text-xs font-medium text-indigo-700 dark:text-indigo-300">
-            <Sparkles className="w-4 h-4 animate-pulse text-indigo-500" />
+          <div className="mt-2.5 flex items-center gap-2 text-xs font-medium text-black dark:text-white">
+            <Sparkles className="w-4 h-4 text-black dark:text-white" />
             <span>Foto cargada: la IA transcribirá las fórmulas y guiará la resolución paso a paso.</span>
           </div>
         </div>
@@ -125,21 +125,21 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           }}
           className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 dark:border-indigo-400 scale-[0.99]'
-              : 'border-slate-300 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50/60 dark:bg-slate-900/40'
+              ? 'border-black bg-neutral-100 dark:bg-neutral-900 dark:border-white scale-[0.99]'
+              : 'border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white bg-neutral-50 dark:bg-neutral-950'
           }`}
         >
           <div className="flex flex-col items-center justify-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-black dark:text-white shadow-xs">
               <ImageIcon className="w-6 h-6" />
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              <p className="text-sm font-semibold text-black dark:text-white">
                 Sube una foto de tu ejercicio o libro de texto
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Arrastra aquí la foto, pega con <kbd className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-[10px] font-mono">Ctrl+V</kbd> o elige una opción:
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Arrastra aquí la foto, pega con <kbd className="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 text-[10px] font-mono">Ctrl+V</kbd> o elige una opción:
               </p>
             </div>
 
@@ -147,16 +147,16 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 shadow-2xs transition-colors cursor-pointer"
               >
-                <Upload className="w-3.5 h-3.5 text-indigo-500" />
+                <Upload className="w-3.5 h-3.5 text-black dark:text-white" />
                 Examinar archivo
               </button>
 
               <button
                 type="button"
                 onClick={() => cameraInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 shadow-2xs transition-colors cursor-pointer border border-black dark:border-white"
               >
                 <Camera className="w-3.5 h-3.5" />
                 Tomar foto con cámara
@@ -164,12 +164,12 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             </div>
 
             {errorMsg && (
-              <p className="text-xs font-medium text-rose-600 dark:text-rose-400 mt-1">
+              <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mt-1">
                 {errorMsg}
               </p>
             )}
 
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+            <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1">
               Consejo: Para mejores resultados, enfoca bien la libreta o examen y evita sombras.
             </p>
           </div>

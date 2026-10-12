@@ -6,18 +6,16 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  AlertTriangle,
   RotateCcw,
   PenTool,
   ChevronRight,
   ChevronLeft,
-  Trophy,
   ArrowRight,
   Flame,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { MathText, FormulaBadge } from '../utils/katexRenderer';
-import { Exam, ExamQuestion, ExamAttempt } from '../types/math';
+import { MathText } from '../utils/katexRenderer';
+import { Exam, ExamAttempt } from '../types/math';
 
 interface ExamSimulatorViewProps {
   onOpenScratchpad: () => void;
@@ -26,11 +24,6 @@ interface ExamSimulatorViewProps {
 }
 
 const PREPA_EXAM_PRESETS = [
-  {
-    title: 'Examen de Admisión UNAM / IPN / EXANI-II',
-    topic: 'Razonamiento Matemático & Temas Clave de Prepa',
-    desc: 'Preguntas representativas de ingreso a nivel superior (Álgebra, Geometría, Cálculo básico).',
-  },
   {
     title: 'Álgebra II: Cuadráticas & Factorización',
     topic: 'Álgebra II',
@@ -98,33 +91,24 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: selectedTopic,
-          customPrompt: customPrompt,
-          numQuestions: numQuestions,
-          difficulty: difficulty,
-          examType: examType,
+          customPrompt,
+          numQuestions,
+          difficulty,
+          examType,
         }),
       });
 
-      if (!res.ok) throw new Error('Error al generar el simulacro.');
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error('Error al generar el simulacro de examen.');
+      }
 
-      const newExam: Exam = {
-        id: `exam-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        examTitle: data.examTitle || `Simulacro: ${selectedTopic}`,
-        description: data.description || 'Evaluación diagnóstica con explicaciones paso a paso.',
-        topic: selectedTopic,
-        difficulty: difficulty,
-        targetTimeMinutes: data.targetTimeMinutes || numQuestions * 3,
-        questions: data.questions || [],
-      };
-
-      setCurrentExam(newExam);
+      const examData: Exam = await res.json();
+      setCurrentExam(examData);
       setCurrentQuestionIdx(0);
-      setSecondsLeft((newExam.targetTimeMinutes || 15) * 60);
+      setSecondsLeft((examData.targetTimeMinutes || numQuestions * 3) * 60);
       setTimeSpentSeconds(0);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert(err.message || 'Error al conectar con el generador de exámenes.');
     } finally {
       setIsGenerating(false);
     }
@@ -135,19 +119,24 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
     if (!currentExam || isExamCompleted) return;
 
     const interval = setInterval(() => {
-      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          handleFinishExam();
+          return 0;
+        }
+        return prev - 1;
+      });
       setTimeSpentSeconds((prev) => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);
   }, [currentExam, isExamCompleted]);
 
-  // Finish exam
+  // Finish exam and compute score
   const handleFinishExam = () => {
     if (!currentExam) return;
     setIsExamCompleted(true);
 
-    // Calculate score
     let correctCount = 0;
     currentExam.questions.forEach((q) => {
       if (userAnswers[q.id] === q.correctOptionId) {
@@ -157,26 +146,28 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
 
     const scorePercentage = Math.round((correctCount / currentExam.questions.length) * 100);
 
+    // Save attempt record
     const attempt: ExamAttempt = {
-      id: `att-${Date.now()}`,
+      id: `attempt-${Date.now()}`,
       examId: currentExam.id,
       examTitle: currentExam.examTitle,
       topic: currentExam.topic,
-      date: new Date().toISOString(),
-      timeSpentSeconds,
+      date: new Date().toLocaleDateString(),
       answers: userAnswers,
       score: scorePercentage,
       totalQuestions: currentExam.questions.length,
       correctCount,
+      timeSpentSeconds,
     };
-
     onSaveExamAttempt(attempt);
 
-    if (scorePercentage >= 70) {
+    // Subtle celebration for high scores
+    if (scorePercentage >= 80) {
       confetti({
-        particleCount: 70,
-        spread: 90,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.6 },
+        colors: ['#000000', '#666666', '#cccccc'],
       });
     }
   };
@@ -191,18 +182,18 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
     <div className="space-y-6">
       {!currentExam ? (
         /* Configuration & Generator Card */
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-black rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">
+              <div className="p-3 rounded-2xl bg-black text-white dark:bg-white dark:text-black">
                 <GraduationCap className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                <h2 className="text-xl font-bold text-black dark:text-white">
                   Simulador de Exámenes Personalizado (Prepa)
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Prepárate para tus parciales o exámenes de admisión (UNAM, IPN, EXANI-II) o ponte a prueba por pasatiempo.
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  Prepárate para tus parciales o ponte a prueba por pasatiempo.
                 </p>
               </div>
             </div>
@@ -211,7 +202,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
           {/* Config Controls */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
                 Materia o Tema Principal:
               </label>
               <input
@@ -219,12 +210,12 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="ej. Cálculo: Derivadas y Optimización, Álgebra II, Geometría Analítica..."
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-sm text-black dark:text-white focus:outline-hidden focus:ring-2 focus:ring-black dark:focus:ring-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
                 Propósito del Simulador:
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -233,8 +224,8 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                   onClick={() => setExamType('prep_standard')}
                   className={`p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     examType === 'prep_standard'
-                      ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                      ? 'border-black dark:border-white bg-black text-white dark:bg-white dark:text-black'
+                      : 'border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900'
                   }`}
                 >
                   Estudiar para un Examen
@@ -244,18 +235,18 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                   onClick={() => setExamType('pasatiempo')}
                   className={`p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                     examType === 'pasatiempo'
-                      ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                      ? 'border-black dark:border-white bg-black text-white dark:bg-white dark:text-black'
+                      : 'border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900'
                   }`}
                 >
-                  <Flame className="w-3.5 h-3.5 inline mr-1 text-amber-500" />
+                  <Flame className="w-3.5 h-3.5 inline mr-1" />
                   Gusto / Pasatiempo
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
                 Cantidad de Preguntas:
               </label>
               <div className="flex gap-2">
@@ -266,8 +257,8 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     onClick={() => setNumQuestions(num)}
                     className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                       numQuestions === num
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800'
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-xs'
+                        : 'border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-900'
                     }`}
                   >
                     {num} preguntas
@@ -277,7 +268,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
                 Nivel de Dificultad:
               </label>
               <div className="flex gap-2">
@@ -288,8 +279,8 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     onClick={() => setDifficulty(d)}
                     className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer ${
                       difficulty === d
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800'
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-xs'
+                        : 'border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-900'
                     }`}
                   >
                     {d}
@@ -300,7 +291,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
               Instrucción o Énfasis Específico (Opcional):
             </label>
             <input
@@ -308,7 +299,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="ej. Enfatizar problemas aplicados de optimización y preguntas con gráficas de funciones"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 text-sm text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-sm text-black dark:text-white focus:outline-hidden focus:ring-2 focus:ring-black dark:focus:ring-white"
             />
           </div>
 
@@ -316,24 +307,24 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
             type="button"
             onClick={() => handleGenerateExam()}
             disabled={isGenerating}
-            className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            className="w-full py-3.5 px-6 rounded-2xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:bg-neutral-200 dark:disabled:bg-neutral-800 disabled:text-neutral-400 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-black dark:border-white"
           >
             {isGenerating ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 <span>Generando simulacro con reactivos y explicaciones...</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-5 h-5 text-indigo-200" />
+                <Sparkles className="w-5 h-5" />
                 <span>Crear y Comenzar Examen con IA</span>
               </>
             )}
           </button>
 
           {/* Quick Presets */}
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+          <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block mb-2">
               Plantillas de simulacro preparadas:
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -345,12 +336,12 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     setTopic(p.topic);
                     handleGenerateExam(p.topic);
                   }}
-                  className="text-left p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer group"
+                  className="text-left p-3.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:border-black dark:hover:border-white transition-all cursor-pointer group"
                 >
-                  <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                  <div className="text-xs font-bold text-black dark:text-white">
                     {p.title}
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
                     {p.desc}
                   </div>
                 </button>
@@ -362,20 +353,20 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
         /* Exam in Progress View */
         <div className="space-y-5">
           {/* Top Bar with Timer & Controls */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white dark:bg-black rounded-3xl p-5 border border-neutral-200 dark:border-neutral-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white border border-neutral-300 dark:border-neutral-700">
                 {currentExam.topic}
               </span>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">
+              <h3 className="text-base font-bold text-black dark:text-white mt-1">
                 {currentExam.examTitle}
               </h3>
             </div>
 
             <div className="flex items-center gap-3">
               {/* Timer */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-mono font-bold">
-                <Clock className="w-4 h-4 text-indigo-500" />
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white text-xs font-mono font-bold border border-neutral-200 dark:border-neutral-800">
+                <Clock className="w-4 h-4 text-black dark:text-white" />
                 <span>{formatTimer(secondsLeft)}</span>
               </div>
 
@@ -383,7 +374,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenScratchpad}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-100 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white text-xs font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 transition-colors cursor-pointer"
               >
                 <PenTool className="w-3.5 h-3.5" />
                 <span>Pizarra</span>
@@ -393,7 +384,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
               <button
                 type="button"
                 onClick={handleFinishExam}
-                className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-bold transition-all shadow-xs cursor-pointer border border-black dark:border-white"
               >
                 Finalizar Examen
               </button>
@@ -412,10 +403,10 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                   onClick={() => setCurrentQuestionIdx(idx)}
                   className={`w-9 h-9 rounded-xl font-bold text-xs shrink-0 transition-all cursor-pointer flex items-center justify-center ${
                     isSelected
-                      ? 'bg-indigo-600 text-white ring-2 ring-indigo-400 ring-offset-2 dark:ring-offset-slate-900'
+                      ? 'bg-black text-white dark:bg-white dark:text-black ring-2 ring-neutral-400'
                       : isAnswered
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                      ? 'bg-neutral-300 text-black dark:bg-neutral-700 dark:text-white'
+                      : 'bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700'
                   }`}
                 >
                   {idx + 1}
@@ -430,9 +421,9 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
             if (!currentQ) return null;
 
             return (
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <div className="bg-white dark:bg-black rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
+                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
                     Pregunta {currentQuestionIdx + 1} de {currentExam.questions.length} • {currentQ.topic}
                   </span>
                   <button
@@ -443,7 +434,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                         [currentQ.id]: !prev[currentQ.id],
                       }))
                     }
-                    className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-black dark:text-white underline cursor-pointer"
                   >
                     <HelpCircle className="w-3.5 h-3.5" />
                     <span>{revealedHints[currentQ.id] ? 'Ocultar pista' : 'Ver pista pedagógica'}</span>
@@ -451,14 +442,14 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                 </div>
 
                 {/* Statement */}
-                <div className="text-base text-slate-900 dark:text-white font-medium leading-relaxed">
+                <div className="text-base text-black dark:text-white font-medium leading-relaxed">
                   <MathText content={currentQ.questionLatex} />
                 </div>
 
                 {/* Pedagogical Hint if opened */}
                 {revealedHints[currentQ.id] && (
-                  <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-xs text-indigo-900 dark:text-indigo-200 flex items-start gap-2.5 animate-in fade-in">
-                    <Sparkles className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-xs text-black dark:text-white flex items-start gap-2.5 animate-in fade-in">
+                    <Sparkles className="w-4 h-4 text-black dark:text-white shrink-0 mt-0.5" />
                     <div>
                       <strong className="block mb-0.5">Pista orientativa:</strong>
                       <MathText content={currentQ.pedagogicalHint} />
@@ -482,20 +473,20 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                         }
                         className={`w-full text-left p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-3.5 ${
                           isSelected
-                            ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-600 dark:border-indigo-500 shadow-xs'
-                            : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                            ? 'bg-neutral-100 dark:bg-neutral-900 border-black dark:border-white shadow-xs'
+                            : 'bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400'
                         }`}
                       >
                         <div
                           className={`w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 ${
                             isSelected
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                              ? 'bg-black text-white dark:bg-white dark:text-black'
+                              : 'bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white border border-neutral-300 dark:border-neutral-700'
                           }`}
                         >
                           {opt.id}
                         </div>
-                        <div className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+                        <div className="flex-1 text-sm font-medium text-black dark:text-white">
                           <MathText content={opt.text} />
                         </div>
                       </button>
@@ -504,12 +495,12 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-800">
                   <button
                     type="button"
                     onClick={() => setCurrentQuestionIdx((prev) => Math.max(prev - 1, 0))}
                     disabled={currentQuestionIdx === 0}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 disabled:opacity-40 cursor-pointer flex items-center gap-1"
+                    className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-600 dark:text-neutral-400 disabled:opacity-40 cursor-pointer flex items-center gap-1 hover:text-black dark:hover:text-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Anterior
@@ -519,7 +510,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setCurrentQuestionIdx((prev) => prev + 1)}
-                      className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      className="px-5 py-2 rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-bold cursor-pointer flex items-center gap-1 shadow-xs border border-black dark:border-white"
                     >
                       Siguiente
                       <ChevronRight className="w-4 h-4" />
@@ -528,7 +519,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     <button
                       type="button"
                       onClick={handleFinishExam}
-                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer shadow-xs"
+                      className="px-5 py-2 rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-bold cursor-pointer shadow-xs border border-black dark:border-white"
                     >
                       Entregar Examen
                     </button>
@@ -551,30 +542,22 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
             const gradeOutOf10 = ((score / 100) * 10).toFixed(1);
 
             return (
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="bg-white dark:bg-black rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-xs">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div
-                      className={`w-16 h-16 rounded-3xl flex items-center justify-center font-bold text-2xl shadow-sm ${
-                        score >= 80
-                          ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
-                          : score >= 60
-                          ? 'bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400'
-                          : 'bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
-                      }`}
-                    >
+                    <div className="w-16 h-16 rounded-3xl flex items-center justify-center font-bold text-2xl shadow-sm bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white border border-neutral-300 dark:border-neutral-700">
                       {gradeOutOf10}
                     </div>
 
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                      <h3 className="text-xl font-bold text-black dark:text-white">
                         {score >= 80
                           ? '¡Excelente dominio matemático!'
                           : score >= 60
                           ? '¡Buen intento! Reforcemos algunos detalles'
                           : 'Oportunidad ideal para repasar los conceptos'}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                         Acertaste {correctCount} de {currentExam.questions.length} preguntas ({score}%).
                         Tiempo empleado: {Math.floor(timeSpentSeconds / 60)} min {timeSpentSeconds % 60} seg.
                       </p>
@@ -587,7 +570,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                       setCurrentExam(null);
                       setIsExamCompleted(false);
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold cursor-pointer transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 text-xs font-bold cursor-pointer transition-colors border border-black dark:border-white"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>Hacer otro simulacro</span>
@@ -599,7 +582,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
 
           {/* Detailed Question by Question Diagnostic Review */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+            <h3 className="text-base font-bold text-black dark:text-white">
               Revisión Detallada & Explicación Paso a Paso de Cada Pregunta:
             </h3>
 
@@ -610,36 +593,26 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
               return (
                 <div
                   key={q.id}
-                  className={`rounded-3xl p-6 border transition-all ${
-                    isCorrect
-                      ? 'bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800/60'
-                      : 'bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-800/60'
-                  }`}
+                  className="bg-white dark:bg-black rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 transition-all shadow-2xs"
                 >
-                  <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-start justify-between gap-3 pb-3 border-b border-neutral-200 dark:border-neutral-800">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
-                          isCorrect
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-rose-500 text-white'
-                        }`}
-                      >
+                      <span className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs bg-black text-white dark:bg-white dark:text-black">
                         {idx + 1}
                       </span>
-                      <span className="text-xs font-semibold text-slate-500">
+                      <span className="text-xs font-semibold text-neutral-500">
                         {q.topic}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {isCorrect ? (
-                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <span className="text-xs font-bold text-black dark:text-white flex items-center gap-1">
                           <CheckCircle2 className="w-4 h-4" />
                           Correcta
                         </span>
                       ) : (
-                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                        <span className="text-xs font-bold text-neutral-500 flex items-center gap-1">
                           <XCircle className="w-4 h-4" />
                           Incorrecta
                         </span>
@@ -648,7 +621,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                   </div>
 
                   {/* Question Latex */}
-                  <div className="py-3 text-sm font-semibold text-slate-900 dark:text-white">
+                  <div className="py-3 text-sm font-semibold text-black dark:text-white">
                     <MathText content={q.questionLatex} />
                   </div>
 
@@ -658,11 +631,11 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                       const isUserChoice = selectedOptionId === opt.id;
                       const isActualCorrect = opt.id === q.correctOptionId;
 
-                      let badgeClass = 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300';
+                      let badgeClass = 'bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300';
                       if (isActualCorrect) {
-                        badgeClass = 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-400 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 font-bold';
+                        badgeClass = 'bg-neutral-200 dark:bg-neutral-800 border-black dark:border-white text-black dark:text-white font-bold ring-1 ring-black dark:ring-white';
                       } else if (isUserChoice && !isActualCorrect) {
-                        badgeClass = 'bg-rose-50 dark:bg-rose-950/60 border-rose-400 dark:border-rose-700 text-rose-800 dark:text-rose-200';
+                        badgeClass = 'bg-neutral-100 dark:bg-neutral-900 border-neutral-400 dark:border-neutral-600 text-neutral-500 line-through';
                       }
 
                       return (
@@ -674,26 +647,26 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                           <div className="flex-1">
                             <MathText content={opt.text} />
                           </div>
-                          {isActualCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
-                          {isUserChoice && !isActualCorrect && <XCircle className="w-4 h-4 text-rose-500 shrink-0" />}
+                          {isActualCorrect && <CheckCircle2 className="w-4 h-4 text-black dark:text-white shrink-0" />}
+                          {isUserChoice && !isActualCorrect && <XCircle className="w-4 h-4 text-neutral-400 shrink-0" />}
                         </div>
                       );
                     })}
                   </div>
 
                   {/* Step-by-Step Pedagogical Explanation */}
-                  <div className="mt-4 p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 space-y-2">
-                    <div className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-indigo-500" />
+                  <div className="mt-4 p-4 rounded-2xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2">
+                    <div className="text-xs font-bold uppercase tracking-wider text-black dark:text-white flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4" />
                       <span>Procedimiento formal paso a paso (¿Por qué es esa la respuesta?):</span>
                     </div>
                     <MathText
                       content={q.stepByStepExplanation}
-                      className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed"
+                      className="text-xs text-neutral-800 dark:text-neutral-200 leading-relaxed"
                     />
 
                     {q.commonMistake && (
-                      <div className="pt-2 text-xs text-amber-700 dark:text-amber-400 font-medium">
+                      <div className="pt-2 text-xs text-neutral-600 dark:text-neutral-400 font-medium">
                         <strong>Error común en exámenes:</strong> {q.commonMistake}
                       </div>
                     )}
@@ -704,7 +677,7 @@ export const ExamSimulatorView: React.FC<ExamSimulatorViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onSendToTutor(q.questionLatex)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-black dark:text-white underline hover:opacity-75 cursor-pointer"
                     >
                       <span>Estudiar este problema a fondo con el Tutor Socrático</span>
                       <ArrowRight className="w-3.5 h-3.5" />

@@ -133,7 +133,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
     }
 
     // Plot function
-    ctx.strokeStyle = '#4f46e5';
+    ctx.strokeStyle = isDark ? '#ffffff' : '#000000';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
 
@@ -165,7 +165,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
       const ptY = originY - evaluatedY * scale;
 
       // Draw point
-      ctx.fillStyle = '#ec4899';
+      ctx.fillStyle = isDark ? '#ffffff' : '#000000';
       ctx.beginPath();
       ctx.arc(ptX, ptY, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -174,7 +174,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
       if (showTangent) {
         const m = numericalDerivative(expression, evaluateX);
         if (!isNaN(m)) {
-          ctx.strokeStyle = '#f59e0b';
+          ctx.strokeStyle = isDark ? '#aaaaaa' : '#555555';
           ctx.lineWidth = 1.5;
           ctx.setLineDash([4, 4]);
           ctx.beginPath();
@@ -221,18 +221,18 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+    <div className="bg-white dark:bg-black rounded-3xl p-6 border border-neutral-200 dark:border-neutral-800 shadow-xs space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">
+            <div className="p-2 rounded-xl bg-black text-white dark:bg-white dark:text-black">
               <LineChart className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-bold text-black dark:text-white">
               Graficador Matemático Interactivo (Prepa)
             </h2>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
             Visualiza funciones, analiza raíces, vértices y rectas tangentes para Cálculo y Geometría Analítica.
           </p>
         </div>
@@ -241,7 +241,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
           <button
             type="button"
             onClick={() => setScale((s) => Math.min(s * 1.25, 120))}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 transition-colors cursor-pointer"
             title="Acercar (Zoom In)"
           >
             <ZoomIn className="w-4 h-4" />
@@ -249,7 +249,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
           <button
             type="button"
             onClick={() => setScale((s) => Math.max(s / 1.25, 15))}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 transition-colors cursor-pointer"
             title="Alejar (Zoom Out)"
           >
             <ZoomOut className="w-4 h-4" />
@@ -261,7 +261,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
               setCenterX(0);
               setCenterY(0);
             }}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 transition-colors cursor-pointer"
             title="Restablecer vista centrada"
           >
             <RotateCcw className="w-4 h-4" />
@@ -272,7 +272,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
       {/* Expression input */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="font-serif italic font-bold text-indigo-600 dark:text-indigo-400 text-lg">
+          <span className="font-serif italic font-bold text-black dark:text-white text-lg">
             f(x) =
           </span>
           <input
@@ -280,13 +280,13 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
             value={expression}
             onChange={(e) => setExpression(e.target.value)}
             placeholder="ej. x^2 - 4, sin(x), 2x + 3"
-            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white font-mono text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-black dark:text-white font-mono text-sm focus:outline-hidden focus:ring-2 focus:ring-black dark:focus:ring-white"
           />
         </div>
 
         {/* Quick presets */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">
+          <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mr-1">
             Ejemplos:
           </span>
           {PRESETS.map((p) => (
@@ -294,7 +294,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
               key={p.label}
               type="button"
               onClick={() => setExpression(p.expr)}
-              className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 transition-colors cursor-pointer"
+              className="text-xs px-2.5 py-1 rounded-lg bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white transition-colors cursor-pointer"
             >
               {p.label}
             </button>
@@ -303,7 +303,7 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
       </div>
 
       {/* Canvas */}
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 shadow-inner">
+      <div className="relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 shadow-inner">
         <canvas
           ref={canvasRef}
           width={720}
@@ -316,28 +316,28 @@ export const GraphingCalculator: React.FC<GraphingCalculatorProps> = ({
         />
 
         {/* Floating Controls inside canvas */}
-        <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-200/80 dark:border-slate-800 text-xs flex flex-wrap items-center gap-3 shadow-md">
+        <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-black/95 backdrop-blur-md px-3 py-2 rounded-xl border border-neutral-300 dark:border-neutral-700 text-xs flex flex-wrap items-center gap-3 shadow-md text-black dark:text-white">
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-slate-600 dark:text-slate-300">Evaluar x:</span>
+            <span className="font-semibold text-neutral-600 dark:text-neutral-400">Evaluar x:</span>
             <input
               type="number"
               value={evaluateX}
               onChange={(e) => setEvaluateX(parseFloat(e.target.value) || 0)}
               step="0.5"
-              className="w-14 px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-center text-xs"
+              className="w-14 px-1.5 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 font-mono text-center text-xs text-black dark:text-white"
             />
           </div>
 
-          <div className="font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+          <div className="font-mono text-black dark:text-white font-bold">
             f({evaluateX}) = {evaluatedY !== null ? evaluatedY.toFixed(3) : 'Indefinido'}
           </div>
 
-          <label className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+          <label className="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={showTangent}
               onChange={(e) => setShowTangent(e.target.checked)}
-              className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              className="rounded accent-black dark:accent-white cursor-pointer"
             />
             <span>Recta tangente (Derivada)</span>
           </label>

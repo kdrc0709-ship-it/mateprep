@@ -62,7 +62,7 @@ export const MathText: React.FC<MathRendererProps> = ({ content, className = '' 
         parts.push(
           <div
             key={key}
-            className="my-3 overflow-x-auto py-1 text-center font-serif text-slate-800 dark:text-slate-100"
+            className="my-3 overflow-x-auto py-1 text-center font-serif text-black dark:text-white"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         );
@@ -70,7 +70,7 @@ export const MathText: React.FC<MathRendererProps> = ({ content, className = '' 
         parts.push(
           <span
             key={key}
-            className="mx-0.5 inline-block font-serif text-slate-900 dark:text-slate-100 align-baseline"
+            className="mx-0.5 inline-block font-serif text-black dark:text-white align-baseline"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         );
@@ -78,7 +78,7 @@ export const MathText: React.FC<MathRendererProps> = ({ content, className = '' 
     } catch {
       // Fallback
       parts.push(
-        <code key={key} className="rounded bg-slate-100 px-1 py-0.5 text-xs text-rose-600 dark:bg-slate-800 dark:text-rose-400">
+        <code key={key} className="rounded bg-neutral-100 px-1 py-0.5 text-xs text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 font-mono">
           {mathExpr}
         </code>
       );
@@ -114,7 +114,7 @@ function renderFormattedText(text: string, baseKey: string): React.ReactNode {
             subParts.push(line.substring(subLast, bMatch.index));
           }
           subParts.push(
-            <strong key={`b-${lIdx}-${bMatch.index}`} className="font-semibold text-slate-900 dark:text-white">
+            <strong key={`b-${lIdx}-${bMatch.index}`} className="font-semibold text-black dark:text-white">
               {bMatch[1]}
             </strong>
           );

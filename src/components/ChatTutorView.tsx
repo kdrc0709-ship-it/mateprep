@@ -37,13 +37,13 @@ const STARTER_PROMPTS = [
   'Explícame las leyes de Newton con ejemplos cotidianos',
   'Ayúdame con el límite de (x² - 4)/(x - 2) cuando x tiende a 2',
   '¿Cuáles son las fases de la división celular (mitosis y meiosis)?',
-  'Dame consejos para preparar mi examen de admisión',
+  'Dame consejos para preparar mi examen de matemáticas',
 ];
 
 const INITIAL_WELCOME_TEXT = `¡Hola! Soy tu **Tutor y Asistente de MatePrep** 🎓.\n\nEstoy aquí para ayudarte con **todo lo que necesites**:
 - 📐 **Matemáticas a fondo:** Álgebra, Geometría, Trigonometría, Geometría Analítica, Cálculo y Probabilidad.
 - 🔬 **Ciencias & Humanidades:** Física, Química, Biología, Historia, Literatura, Filosofía, Programación y Computación.
-- 💡 **Exámenes y dudas diarias:** Consejos para CENEVAL EXANI-II, UNAM, IPN o cualquier curiosidad cotidiana.
+- 💡 **Exámenes y dudas diarias:** Consejos para exámenes de preparatoria o cualquier curiosidad cotidiana.
 
 ✨ **Metodología:** Si me pides resolver un ejercicio matemático o subes una foto, te guiaré **paso a paso** para que aprendas el porqué de cada procedimiento. Si solo quieres platicar, saludar o preguntar algo de otra materia, ¡te responderé con todo gusto!
 
@@ -335,7 +335,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8.5rem)] max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+    <div className="flex flex-col flex-1 h-[calc(100vh-12rem)] min-h-[500px] max-w-4xl w-full mx-auto bg-white dark:bg-black rounded-3xl border border-neutral-200 dark:border-neutral-800 shadow-sm overflow-hidden transition-colors">
       {/* Hidden File Inputs */}
       <input
         ref={fileInputRef}
@@ -354,25 +354,25 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
       />
 
       {/* Chat Header */}
-      <div className="px-4 sm:px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-900/80 gap-3">
+      <div className="px-4 sm:px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-950 gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+            <div className="w-9 h-9 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-sm shadow-xs">
               <Sparkles className="w-5 h-5" />
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-neutral-400 dark:bg-neutral-500 ring-2 ring-white dark:ring-black" />
           </div>
 
           <div className="truncate">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <h2 className="text-sm font-bold text-black dark:text-white truncate">
                 MatePrep • Tutor IA
               </h2>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 shrink-0">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-neutral-800 text-black dark:text-white shrink-0">
                 Bachillerato
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
               Matemáticas • Ciencias • Preparatoria • Exámenes
             </p>
           </div>
@@ -384,7 +384,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
           <button
             type="button"
             onClick={handleStartNewChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 text-xs font-bold border border-indigo-200/80 dark:border-indigo-800/80 transition-colors cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors cursor-pointer shadow-xs"
             title="Iniciar un nuevo chat desde cero"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -396,9 +396,9 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
             type="button"
             onClick={onOpenScratchpad}
             title="Abrir pizarra de borrador"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-black dark:text-white text-xs font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800 shadow-2xs transition-colors cursor-pointer"
           >
-            <PenTool className="w-3.5 h-3.5 text-indigo-500" />
+            <PenTool className="w-3.5 h-3.5 text-black dark:text-white" />
             <span className="hidden sm:inline">Pizarra</span>
           </button>
         </div>
@@ -414,7 +414,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               className={`flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser && (
-                <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-black dark:text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   <Sparkles className="w-4 h-4" />
                 </div>
               )}
@@ -422,13 +422,13 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               <div
                 className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-3 shadow-xs space-y-2 ${
                   isUser
-                    ? 'bg-indigo-600 text-white rounded-tr-xs'
-                    : 'bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-slate-200/60 dark:border-slate-750'
+                    ? 'bg-black text-white dark:bg-neutral-900 dark:text-white rounded-tr-xs border border-black dark:border-neutral-700'
+                    : 'bg-neutral-100 dark:bg-neutral-900/90 text-black dark:text-white rounded-tl-xs border border-neutral-200 dark:border-neutral-800'
                 }`}
               >
                 {/* Attached image if any */}
                 {msg.imageBase64 && (
-                  <div className="rounded-xl overflow-hidden max-h-64 bg-black/10">
+                  <div className="rounded-xl overflow-hidden max-h-64 bg-neutral-200 dark:bg-neutral-800">
                     <img
                       src={msg.imageBase64}
                       alt="Imagen enviada"
@@ -447,8 +447,8 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
                   </div>
                 ) : (
                   isLoading && !isUser && (
-                    <div className="flex items-center gap-2 py-1 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" />
+                    <div className="flex items-center gap-2 py-1 text-xs text-neutral-500 dark:text-neutral-400">
+                      <span className="w-2 h-2 rounded-full bg-black dark:bg-white animate-bounce" />
                       <span>El tutor está preparando tu respuesta...</span>
                     </div>
                   )
@@ -456,7 +456,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
                 {/* Paused indicator */}
                 {msg.isPaused && (
-                  <div className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1 pt-1">
+                  <div className="text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 flex items-center gap-1 pt-1">
                     <Pause className="w-3 h-3" />
                     <span>Respuesta pausada</span>
                   </div>
@@ -464,7 +464,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
                 <div
                   className={`text-[10px] text-right font-medium ${
-                    isUser ? 'text-indigo-200' : 'text-slate-400'
+                    isUser ? 'text-neutral-300' : 'text-neutral-400'
                   }`}
                 >
                   {msg.timestamp}
@@ -472,31 +472,31 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
                 {/* Pedagogical quick action chips below AI answers */}
                 {!isUser && msg.id !== 'msg-welcome' && msg.text && (
-                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex flex-wrap gap-1.5">
+                  <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 flex flex-wrap gap-1.5">
                     <button
                       type="button"
                       onClick={() => handleSendMessage('¿Me puedes dar una pista para resolver esto?')}
-                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-slate-600 transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-600"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-neutral-300 dark:border-neutral-700"
                     >
-                      <Lightbulb className="w-3 h-3 text-amber-500" />
+                      <Lightbulb className="w-3 h-3 text-black dark:text-white" />
                       <span>Pista</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleSendMessage('¿Por qué funciona esto? Explícame el concepto con una analogía.')}
-                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-slate-600 transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-600"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-neutral-300 dark:border-neutral-700"
                     >
-                      <HelpCircle className="w-3 h-3 text-indigo-500" />
+                      <HelpCircle className="w-3 h-3 text-black dark:text-white" />
                       <span>¿Por qué funciona?</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleSendMessage('Ya intenté resolverlo, por favor muéstrame el procedimiento formal completo y la comprobación.')}
-                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-slate-600 transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-600"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-lg bg-white dark:bg-neutral-800 text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors cursor-pointer border border-neutral-300 dark:border-neutral-700"
                     >
-                      <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                      <CheckCircle2 className="w-3 h-3 text-black dark:text-white" />
                       <span>Ver solución & comprobación</span>
                     </button>
                   </div>
@@ -509,9 +509,9 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
       {/* Suggested Starter Topics (visible when only 1 message) */}
       {messages.length === 1 && (
-        <div className="px-5 py-2.5 bg-slate-50/50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800/60 overflow-x-auto no-scrollbar">
+        <div className="px-5 py-2.5 bg-neutral-50 dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-800 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+            <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider whitespace-nowrap">
               Sugerencias rápidas:
             </span>
             {STARTER_PROMPTS.map((prompt, idx) => (
@@ -519,7 +519,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
                 key={idx}
                 type="button"
                 onClick={() => handleSendMessage(prompt)}
-                className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 transition-colors cursor-pointer shadow-2xs"
+                className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-white dark:bg-neutral-900 text-black dark:text-white text-xs font-medium border border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white transition-colors cursor-pointer shadow-2xs"
               >
                 {prompt}
               </button>
@@ -530,18 +530,18 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
       {/* Attached Image Preview Bar */}
       {attachedImage && (
-        <div className="px-5 py-2 bg-indigo-50 dark:bg-indigo-950/40 border-t border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between">
+        <div className="px-5 py-2 bg-neutral-100 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img
               src={attachedImage}
               alt="Foto adjunta"
-              className="w-12 h-12 object-cover rounded-lg border border-indigo-300 dark:border-indigo-700"
+              className="w-12 h-12 object-cover rounded-lg border border-neutral-300 dark:border-neutral-700"
             />
             <div className="text-xs">
-              <span className="font-bold text-indigo-900 dark:text-indigo-200 block">
+              <span className="font-bold text-black dark:text-white block">
                 Foto adjunta
               </span>
-              <span className="text-[11px] text-indigo-600 dark:text-indigo-400">
+              <span className="text-[11px] text-neutral-600 dark:text-neutral-400">
                 La IA analizará el problema al enviar tu mensaje.
               </span>
             </div>
@@ -550,7 +550,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
           <button
             type="button"
             onClick={() => setAttachedImage(null)}
-            className="p-1.5 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800 text-black dark:text-white cursor-pointer"
             title="Quitar foto"
           >
             <X className="w-4 h-4" />
@@ -560,18 +560,18 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
       {/* Collapsible Math Symbol Bar */}
       {showSymbolBar && (
-        <div className="px-4 py-2 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60">
+        <div className="px-4 py-2 border-t border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950">
           <MathSymbolBar onInsert={handleInsertSymbol} />
         </div>
       )}
 
       {/* Floating Pause / Stop Button when generating */}
       {isLoading && (
-        <div className="px-4 py-2 bg-slate-50/90 dark:bg-slate-950/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-center animate-in fade-in">
+        <div className="px-4 py-2 bg-neutral-50/95 dark:bg-neutral-950/95 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-center animate-in fade-in">
           <button
             type="button"
             onClick={handlePauseGeneration}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-transform hover:scale-105 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black text-white dark:bg-white dark:text-black hover:opacity-85 text-xs font-bold shadow-md transition-transform hover:scale-105 cursor-pointer border border-neutral-300 dark:border-neutral-700"
           >
             <Square className="w-3.5 h-3.5 fill-current" />
             <span>Pausar / Detener respuesta</span>
@@ -580,7 +580,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
       )}
 
       {/* Bottom Sticky Chat Input Bar */}
-      <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="p-3 sm:p-4 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -594,7 +594,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               title="Adjuntar imagen de tu libreta o libro"
-              className="p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors cursor-pointer"
             >
               <ImageIcon className="w-5 h-5" />
             </button>
@@ -603,7 +603,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               title="Tomar foto con la cámara"
-              className="p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer hidden sm:block"
+              className="p-2.5 rounded-xl text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors cursor-pointer hidden sm:block"
             >
               <Camera className="w-5 h-5" />
             </button>
@@ -614,8 +614,8 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               title="Símbolos matemáticos (√x, x², π, etc.)"
               className={`p-2.5 rounded-xl font-serif text-sm font-bold transition-colors cursor-pointer ${
                 showSymbolBar
-                  ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400'
-                  : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-black text-white dark:bg-white dark:text-black'
+                  : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
               }`}
             >
               √x
@@ -631,7 +631,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Pregunta lo que sea (matemáticas, física, historia, consejos...)"
               rows={1}
-              className="w-full px-4 py-3 max-h-32 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 resize-none transition-all placeholder:text-slate-400 leading-relaxed block"
+              className="w-full px-4 py-3 max-h-32 rounded-2xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 text-black dark:text-white text-sm focus:outline-hidden focus:ring-2 focus:ring-black dark:focus:ring-white resize-none transition-all placeholder:text-neutral-400 leading-relaxed block"
             />
           </div>
 
@@ -641,7 +641,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
               type="button"
               onClick={handlePauseGeneration}
               title="Pausar respuesta"
-              className="px-4 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none"
+              className="px-4 py-3 rounded-2xl bg-black text-white dark:bg-white dark:text-black hover:opacity-85 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 select-none border border-neutral-300 dark:border-neutral-700"
             >
               <Square className="w-4 h-4 fill-current" />
               <span className="hidden sm:inline">Pausar</span>
@@ -650,7 +650,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
             <button
               type="submit"
               disabled={!inputText.trim() && !attachedImage}
-              className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shrink-0 select-none"
+              className="px-5 py-3 rounded-2xl bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:bg-neutral-200 dark:disabled:bg-neutral-800 disabled:text-neutral-400 dark:disabled:text-neutral-600 font-bold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shrink-0 select-none border border-black dark:border-white"
             >
               <span>Enviar</span>
               <Send className="w-4 h-4" />
