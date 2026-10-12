@@ -241,35 +241,49 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
     setAttachedImage(null);
     setIsLoading(true);
 
-    try {
-      const response = await fetch('/api/math/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: abortController.signal,
-        body: JSON.stringify({
-          messages: updatedHistory.slice(-7, -1), // Recent context only for speed
-          currentInput: text,
-          imageBase64: currentImg,
-          mimeType: currentMime,
-          stream: false,
-        }),
+  try {
+      // Llamada directa a Gemini desde el navegador
+      const ai = new GoogleGenAI({ 
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
       });
 
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        throw new Error(errJson.error || 'Error de conexión con el tutor.');
-      }
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: text,
+      });
 
-      const data = await response.json();
-      const fullReply = data.reply || '¡Hola! ¿En qué te puedo ayudar hoy?';
+      const fullReply = response.text || '¡Hola! ¿En qué te puedo ayudar hoy?';
 
-      // Typewriter progressive reveal (fast & smooth)
+      // Typewriter progressive reveal (rápido y suave)
       let currentIdx = 0;
       const chunkSize = fullReply.length > 300 ? 12 : 6;
       typewriterIntervalRef.current = window.setInterval(() => {
         currentIdx += chunkSize;
         const currentSlice = fullReply.slice(0, currentIdx);
 
+        setMessages((prev) => 
+          prev.map((m) => 
+            m.id === assistantMessageId ? { ...m, text: currentSlice } : m
+          )
+        );
+
+        if (currentIdx >= fullReply.length) {
+          if (typewriterIntervalRef.current) {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+          }
+          setIsLoading(false);
+        }
+      }, 20);
+
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        // Paused by user
+        return;
+      }
+      console.error("Error al conectar con Gemini:", err);
+      setIsLoading(false);
+    }
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMessageId ? { ...m, text: currentSlice } : m
