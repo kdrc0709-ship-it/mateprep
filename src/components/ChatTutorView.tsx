@@ -199,82 +199,35 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
 
   // Send message
   const handleSendMessage = async (textToSend?: string) => {
-    const text = (textToSend !== undefined ? textToSend : inputText).trim();
-    if (!text && !attachedImage) return;
+    const text = (textToSend !== undefined ? textToSend : input).trim();
+    if (!text || isLoading) return;
 
-    // Abort previous generation if any
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
     if (typewriterIntervalRef.current) {
       clearInterval(typewriterIntervalRef.current);
       typewriterIntervalRef.current = null;
     }
 
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    if (textToSend === undefined) {
+      setInput('');
+    }
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
 
-    const userMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      role: 'user',
-      text: text,
-      imageBase64: attachedImage || undefined,
-      mimeType: attachedImage ? attachedMime : undefined,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
+    const userMessageId = Date.now().toString();
+    const assistantMessageId = (Date.now() + 1).toString();
 
-    // Prepare assistant placeholder message
-    const assistantMessageId = `msg-ai-${Date.now()}`;
-    const assistantPlaceholder: ChatMessage = {
-      id: assistantMessageId,
-      role: 'assistant',
-      text: '',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
+    const newMessages: Message[] = [
+      ...messages,
+      { id: userMessageId, sender: 'user', text, timestamp: new Date() },
+      { id: assistantMessageId, sender: 'assistant', text: '', timestamp: new Date() }
+    ];
 
-    const updatedHistory = [...messages, userMessage];
-    setMessages([...updatedHistory, assistantPlaceholder]);
-
-    setInputText('');
-    const currentImg = attachedImage;
-    const currentMime = attachedMime;
-    setAttachedImage(null);
+    setMessages(newMessages);
     setIsLoading(true);
 
- try {
-      const ai = new GoogleGenAI({ 
-        apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
-      });
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: text,
-      });
-
-      const fullReply = response.text || '¡Hola! ¿En qué te puedo ayudar hoy?';
-
-      let currentIdx = 0;
-      const chunkSize = fullReply.length > 300 ? 12 : 6;
-      typewriterIntervalRef.current = window.setInterval(() => {
-        currentIdx += chunkSize;
-        const currentSlice = fullReply.slice(0, currentIdx);
-
-        setMessages((prev) => 
-          prev.map((m) => 
-            m.id === assistantMessageId ? { ...m, text: currentSlice } : m
-          )
-        );
-
-        if (currentIdx >= fullReply.length) {
-          if (typewriterIntervalRef.current) {
-            clearInterval(typewriterIntervalRef.current);
-            typewriterIntervalRef.current = null;
-          }
-          setIsLoading(false);
-        }
-      }, 20);
-
-   try {
+    try {
       const ai = new GoogleGenAI({ 
         apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
       });
@@ -313,7 +266,6 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
       }
       console.error("Error al conectar con Gemini:", err);
       
-      // El mensaje de error visual debe ir DENTRO del catch:
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId
@@ -325,7 +277,7 @@ export const ChatTutorView: React.FC<ChatTutorViewProps> = ({
     } finally {
       abortControllerRef.current = null;
     }
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  };
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
