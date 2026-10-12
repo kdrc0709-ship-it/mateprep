@@ -1,0 +1,8 @@
+{
+  "name": "MatePrep",
+  "description": "Tutor inteligente de matemáticas para estudiantes de preparatoria con guía socrática paso a paso, carga de imágenes y simulaciones de exámenes a medida.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
